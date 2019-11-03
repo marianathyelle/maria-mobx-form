@@ -5,11 +5,11 @@ export class Form {
 
     @observable isSubmiting: boolean = false;
 
-    @observable fields: FormField[]
+    @observable fields: Record<string,FormField>
 
-    onSubmit: (fields: FormField[]) => Promise<any>
+    onSubmit: (fields: Record<string,FormField>) => Promise<any>
 
-    constructor(fields: FormField[], onSubmit: (fields: FormField[]) => Promise<any> ) {
+    constructor(fields: Record<string,FormField>, onSubmit: (fields: Record<string,FormField>) => Promise<any> ) {
         this.fields = observable(fields)
         this.onSubmit = onSubmit
     }
@@ -19,8 +19,12 @@ export class Form {
     }
 
     public isValid(){
-        const invalidFields = this.fields.filter(element => element.isValid === false);
-        return !invalidFields ? true : false;
+        Object.keys(this.fields).forEach((key) => {
+            this.fields[key].isValid
+        }) 
+        // const invalidFields = this.fields.filter(element => element.isValid === false);
+        // return !invalidFields ? true : false;
+        return true;
     }
 
     public async submit(){
