@@ -3,19 +3,19 @@ import { FormField } from "./Interfaces";
 export function required<T>(value: T, field: FormField<T>) {
     if(!value) {
         field.isValid = false;
-        field.infoMessage = "Campo obrigatório";
+        field.helpMessage = "Campo obrigatório";
     } else {
         field.isValid = true;
-        field.infoMessage = undefined;
+        field.helpMessage = undefined;
     }
 }
 
 export function validLength<T>(value: string, field: FormField<T>) {
     if(value && value.length < field.minLength!){
         field.isValid = false;
-        field.infoMessage = `Campo mínimo de ${field.minLength!} dígitos`;
+        field.helpMessage = `Campo mínimo de ${field.minLength!} dígitos`;
     } else {
         field.isValid = field.isValid;
-        field.infoMessage = field.infoMessage;
+        field.helpMessage = field.helpMessage;
     }
 }

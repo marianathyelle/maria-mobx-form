@@ -2,7 +2,7 @@ export interface FormField<T=any> {
     value: T;
     isValid: boolean;
     minLength?: number;
-    infoMessage: string | undefined; 
+    helpMessage: string | undefined; 
     validation?: (value: T, field: FormField<T>) => void;
 }
 
