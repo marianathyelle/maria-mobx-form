@@ -1,39 +1,52 @@
-import { observable } from 'mobx';
-import { FormField, Validators } from './Interfaces';
+import { observable, reaction } from 'mobx';
+import { FormField } from './Interfaces';
 
 export class Form {
     @observable isSubmiting: boolean = false;
     @observable fields: Record<string, FormField>
-
+    @observable isValid: boolean = false
     onSubmit: (fields: Record<string, FormField>) => Promise<any>
 
-    constructor(fields: Record<string, FormField>, onSubmit: (fields: Record<string, FormField>) => Promise<any> ) {
+    constructor(fields: Record<string, FormField>, onSubmit: (fields: Record<string, FormField>) => Promise<any>) {
         this.fields = observable(fields)
+        for (const key in this.fields) {
+            if (this.fields.hasOwnProperty(key)) {
+                const field = this.fields[key];
+                reaction(() => field, (field) => this.validateForm(field))
+            }
+        }
         this.onSubmit = onSubmit
     }
 
-    public validation<T>(value: T, field: FormField<T>, validators: Validators<T>[]) {
-        validators.forEach(item => item.validator(value, field))
-    }
-
-    public isValid(){
-        const invalidFields = Object.keys(this.fields).filter((key) => this.fields[key].isValid === false);
-        if (invalidFields) {
-            invalidFields.forEach(key => {
-                const fieldValue = this.fields[key].value;
-                if (fieldValue && fieldValue.length === this.fields[key].minLength) {
-                    this.fields[key].helpMessage = `${key} inválido(a)`
-                } else {
-                    this.fields[key].helpMessage = 'Campo obrigatório'
+    protected validateForm(field: FormField<any>) {
+        if (field.validators) {
+            field.errorMessage = []
+            for (const validator of field.validators) {
+                var errorMessage = validator(field.value);
+                if (errorMessage) {
+                    field.errorMessage.push(errorMessage);
                 }
-            })
-        } 
-
-        return invalidFields.length > 0 ? false : true;
+            }
+        }
     }
 
-    public async submit(){
-        if(this.isValid()){
+    private _isValid(){
+        var isValid = true
+        for (const key in this.fields) {
+            if (this.fields.hasOwnProperty(key)) {
+                const field = this.fields[key];
+                if(field.errorMessage && field.errorMessage.length > 0){
+                    isValid = false
+                    continue
+                }
+            }
+        }
+        this.isValid = isValid
+        return isValid
+    }
+
+    public async submit() {
+        if (this._isValid()) {
             try {
                 this.isSubmiting = true
                 await this.onSubmit(this.fields)

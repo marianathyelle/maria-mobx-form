@@ -2,10 +2,8 @@ export interface FormField<T=any> {
     value: T;
     isValid: boolean;
     minLength?: number;
-    helpMessage: string | undefined; 
-    validation?: (value: T, field: FormField<T>) => void;
+    errorMessage: string[]; 
+    validators?: ValidatorFunction<T>[]
 }
 
-export interface Validators<T=any> {
-    validator: (value: T, field: FormField<T>) => void;
-}
+export type ValidatorFunction<T> = (value: T) => string | undefined

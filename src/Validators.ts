@@ -1,21 +1,7 @@
-import { FormField } from "./Interfaces";
+import { FormField, ValidatorFunction } from "./Interfaces";
 
-export function required<T>(value: T, field: FormField<T>) {
-    if(!value) {
-        field.isValid = false;
-        field.helpMessage = "Campo obrigatório";
-    } else {
-        field.isValid = true;
-        field.helpMessage = undefined;
-    }
-}
+export const required: ValidatorFunction<string> = (value)  => value ? undefined : "Campo Obrigatório"
 
-export function validLength<T>(value: string, field: FormField<T>) {
-    if(value && value.length < field.minLength!){
-        field.isValid = false;
-        field.helpMessage = `Campo mínimo de ${field.minLength!} dígitos`;
-    } else {
-        field.isValid = field.isValid;
-        field.helpMessage = field.helpMessage;
-    }
+export const minLength = (minLength: number): ValidatorFunction<string> => (value) => {
+    return value && value.length >= minLength ? undefined : `Campo mínimo de ${minLength} dígitos`
 }
