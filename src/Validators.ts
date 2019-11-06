@@ -1,4 +1,4 @@
-import { FormField, ValidatorFunction } from "./Interfaces";
+import { ValidatorFunction } from "./ValidatorFunction";
 
 export const required: ValidatorFunction<string> = (value)  => value ? undefined : "Campo Obrigatório"
 

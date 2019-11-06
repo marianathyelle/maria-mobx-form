@@ -1,61 +1,52 @@
-import { observable, reaction } from 'mobx';
-import { FormField } from './Interfaces';
+import { observable, reaction, computed } from 'mobx';
+import { FormField } from './FormField';
 
-export class Form {
-    @observable isSubmiting: boolean = false;
-    @observable fields: Record<string, FormField>
-    @observable isValid: boolean = false
-    onSubmit: (fields: Record<string, FormField>) => Promise<any>
+export class Form  {
+    @observable public isSubmiting: boolean = false;
+    @observable public fields: Record<string, FormField>
+    @observable private _isFormValid: boolean = false;
+    @observable private _error: boolean = false;
+    @observable onSubmit: (fields: Record<string, FormField>) => Promise<any>;
 
     constructor(fields: Record<string, FormField>, onSubmit: (fields: Record<string, FormField>) => Promise<any>) {
         this.fields = observable(fields)
-        for (const key in this.fields) {
-            if (this.fields.hasOwnProperty(key)) {
-                const field = this.fields[key];
-                reaction(() => field, (field) => this.validateForm(field))
-            }
-        }
         this.onSubmit = onSubmit
     }
 
-    protected validateForm(field: FormField<any>) {
-        if (field.validators) {
-            field.errorMessage = []
-            for (const validator of field.validators) {
-                var errorMessage = validator(field.value);
-                if (errorMessage) {
-                    field.errorMessage.push(errorMessage);
-                }
-            }
-        }
-    }
-
-    private _isValid(){
-        var isValid = true
+    private isValid() {
+        var _isValid = true
         for (const key in this.fields) {
             if (this.fields.hasOwnProperty(key)) {
                 const field = this.fields[key];
-                if(field.errorMessage && field.errorMessage.length > 0){
-                    isValid = false
+                if(!field.isFieldValid){
+                    _isValid = false
                     continue
                 }
             }
         }
-        this.isValid = isValid
-        return isValid
+        this._isFormValid = _isValid
+        return _isValid
     }
 
     public async submit() {
-        if (this._isValid()) {
+        if (this.isValid()) {
+            this.isSubmiting = true
             try {
-                this.isSubmiting = true
                 await this.onSubmit(this.fields)
             } catch (error) {
-                this.isSubmiting = false
+                this._error = true;
             } finally {
                 this.isSubmiting = false
             }
         }
+    }
+
+    @computed get isFormValid() {
+        return this._isFormValid;
+    }
+
+    @computed get error() {
+        return this._error;
     }
 }
 
