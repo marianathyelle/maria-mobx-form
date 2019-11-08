@@ -1,4 +1,4 @@
-import { observable, reaction, computed } from 'mobx';
+import { observable, reaction, computed, action } from 'mobx';
 import { FormField } from './FormField';
 
 export class Form  {
@@ -13,7 +13,7 @@ export class Form  {
         this.onSubmit = onSubmit
     }
 
-    private isValid() {
+    private validateForm() {
         var _isValid = true
         for (const key in this.fields) {
             if (this.fields.hasOwnProperty(key)) {
@@ -29,7 +29,7 @@ export class Form  {
     }
 
     public async submit() {
-        if (this.isValid()) {
+        if (this.validateForm()) {
             this.isSubmiting = true
             try {
                 await this.onSubmit(this.fields)
@@ -47,6 +47,10 @@ export class Form  {
 
     @computed get error() {
         return this._error;
+    }
+
+    @action reset() {
+       Object.keys(this.fields).map(key => this.fields[key].reset())
     }
 }
 
