@@ -20,7 +20,7 @@ export class FormField<T = any> {
     }
 
     protected validateField(value: T) {
-        if (this._isEnabled && this.validators) {
+        if (this.validators) {
             this._errorMessages = []
             for (const validator of this.validators) {
                 var errorMessage = validator(value);
@@ -31,6 +31,8 @@ export class FormField<T = any> {
                     this._isValid = this._errorMessages.length > 0 ? false : true;
                 }
             }
+        } else {
+            this._isValid = true;
         }
     }
 

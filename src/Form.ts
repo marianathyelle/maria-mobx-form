@@ -15,9 +15,10 @@ export class Form  {
 
     private validateForm() {
         var _isValid = true
-        for (const key in this.fields) {
-            if (this.fields.hasOwnProperty(key)) {
-                const field = this.fields[key];
+        let enabledFields = Object.keys(this.fields).filter(key => this.fields[key].isEnabled)
+        for (const key in enabledFields) {
+            if (enabledFields.hasOwnProperty(key)) {
+                const field = this.fields[enabledFields[key]];
                 if(!field.isFieldValid){
                     _isValid = false
                     continue
