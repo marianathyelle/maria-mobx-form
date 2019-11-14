@@ -30,8 +30,8 @@ export class Form  {
     }
 
     public async submit() {
+        this.isSubmiting = true;
         if (this.validateForm()) {
-            this.isSubmiting = true
             try {
                 await this.onSubmit(this.fields)
             } catch (error) {
@@ -39,6 +39,8 @@ export class Form  {
             } finally {
                 this.isSubmiting = false
             }
+        } else {
+            this.isSubmiting = false;
         }
     }
 

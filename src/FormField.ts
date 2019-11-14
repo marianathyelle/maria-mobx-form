@@ -10,20 +10,20 @@ export class FormField<T = any> {
     @observable private _isValid: boolean = false;
     @observable private _isEnabled: boolean = true;
 
-    constructor(value: T, validators?: ValidatorFunction<T>[]) {
+    constructor(value: T, form: () => Form, validators?: ValidatorFunction<T>[]) {
         this._initialValue = value;
         this.value = value;
         this.validators = validators;
 
-        this.validateField(value);
-        reaction(() => this.value, (value) => this.validateField(value))
+        this.validateField(value, form);
+        reaction(() => this.value, (value) => this.validateField(value, form))
     }
 
-    protected validateField(value: T) {
+    protected validateField(value: T, form: () => Form) {
         if (this.validators) {
             this._errorMessages = []
             for (const validator of this.validators) {
-                var errorMessage = validator(value);
+                var errorMessage = validator(value, form);
                 if (errorMessage) {
                     this._errorMessages.push(errorMessage);
                     this._isValid = false;
