@@ -5,7 +5,7 @@ import { AsyncValidatorFunction } from "./ValidatorFunction";
 export class FormField<T = any> {
   @observable private _initialValue: T;
   @observable public value: T;
-  @observable private validators: ValidatorFunction<T>[] | undefined;
+  @observable private validators: ValidatorFunction<T>[] = [];
   @observable private asyncValidators: AsyncValidatorFunction<T>[] | undefined;
   @observable private _isTouched: boolean = false;
   @observable private _errorMessages: string[] | undefined = undefined;
@@ -13,12 +13,7 @@ export class FormField<T = any> {
   @observable private _isEnabled: boolean = true;
   @observable private _isValidating: boolean = false;
 
-  constructor(
-    value: T,
-    form: () => Form,
-    validators?: ValidatorFunction<T>[],
-    asyncValidators?: AsyncValidatorFunction<T>[]
-  ) {
+  constructor(value: T, form: () => Form, validators: ValidatorFunction<T>[], asyncValidators?: AsyncValidatorFunction<T>[]) {
     this._initialValue = value;
     this.value = value;
     this.validators = validators;
@@ -32,22 +27,24 @@ export class FormField<T = any> {
   }
 
   protected validateField(value: T, form: () => Form) {
-    if (this.validators) {
-      this._errorMessages = [];
+    this._errorMessages = [];
+    if (this.validators.length > 0) {
       for (const validator of this.validators) {
         var errorMessage = validator(value, form);
         if (errorMessage) {
           this._errorMessages.push(errorMessage);
           this._isValid = false;
         } else {
-          this._isValid = this._errorMessages.length > 0 ? false : true;
+          this._isValid = this._errorMessages.length == 0;
         }
       }
-    } else if (this.asyncValidators) {
-      this._isValidating = true;
-      this._errorMessages =
-        this._errorMessages!.length == 0 ? this._errorMessages : [];
+    } else {
+      this._isValid = true;
+    }
+
+    if (this.asyncValidators) {
       for (const validator of this.asyncValidators) {
+        this._isValidating = true;
         validator(value, form).then(resp => {
           if (resp) {
             this._errorMessages!.push(resp);
@@ -55,11 +52,12 @@ export class FormField<T = any> {
           } else {
             this._isValid = this._errorMessages!.length == 0;
           }
-        });
+          this._isValidating = false;
+        }).catch(() => {
+          this._isValid = false;
+          this._isValidating = false;
+        })
       }
-      this._isValidating = false;
-    } else {
-      this._isValid = true;
     }
   }
 
