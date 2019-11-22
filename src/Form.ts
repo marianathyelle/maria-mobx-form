@@ -52,6 +52,11 @@ export class Form  {
         return this._error;
     }
 
+    @computed get isValidating() {
+       const fieldsValidating: string[] = Object.keys(this.fields).filter(key => this.fields[key].isValidating === true);
+       return fieldsValidating.length > 0;
+    }
+
     @action reset() {
        Object.keys(this.fields).map(key => this.fields[key].reset())
     }
